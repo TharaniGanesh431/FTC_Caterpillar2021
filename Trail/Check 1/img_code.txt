@@ -1,0 +1,45 @@
+ try:
+        camera = VideoCapture(0)
+        ret, frame = camera.read()
+        
+        blurValue = 41  
+        
+        blur = GaussianBlur(frame, ((blurValue, blurValue)), 0)
+        hsv = cvtColor(blur, COLOR_BGR2HSV)     
+        lower = [18,50,50]
+        upper = [35,255,255]
+        lower = array(lower, dtype = "float32")
+        upper = array(upper, dtype = "float32")
+        mask = inRange(hsv, lower, upper)
+        
+        output = bitwise_and(frame, hsv, mask = mask)
+        imwrite("original5.jpg", frame)
+        _,contours, hierarchy = findContours(mask, RETR_TREE, CHAIN_APPROX_SIMPLE)
+        
+        for cnt in contours:
+            approx = approxPolyDP(cnt, 0.01*arcLength(cnt, True), True)
+            drawContours(mask, [approx], 0, (0), 5)
+            x = approx.ravel()[0]
+            y = approx.ravel()[1]
+            
+            if len(approx)<10 :
+                approx = approxPolyDP(cnt, 0.01*arcLength(cnt, True), True)
+                drawContours(output, [approx], 0, (100), 10)
+                print(x)
+            else:
+                drawContours(output, [approx], 0, (100), 10)
+            imwrite("Shapes5.jpg", output)
+            break
+               
+        if x>=0 and x<=213 :
+            return -1
+        elif x>213 and x<=427:
+            return 0
+        elif x>427 and x<=640:
+            return 1
+        
+
+    except Exception as e:
+        print(e)
+        print('\n Process abrupted!!')
+        pass
